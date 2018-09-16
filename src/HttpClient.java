@@ -105,6 +105,7 @@ public class HttpClient {
         if (curlCommandLine.haveFile){
             request.requestBody+= readFile(curlCommandLine.file);
         }
+        request.requestHeaders.add("Content-Length:"+request.requestBody.length());
 
         return request;
     }

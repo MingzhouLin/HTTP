@@ -68,7 +68,6 @@ class Tool {
                 }
                 System.out.println(response);
                 System.out.println("The page had been moved. Redirect to : " + redirectLocation + "\n");
-                //TODO: Need a common function to build Request.
                 return HttpLibrary.sendRequest(Tool.buildRequest(redirectLocation));
             } else if (statusCode >= 200 && statusCode < 300) {
                 //Without -v.
@@ -82,5 +81,4 @@ class Tool {
         String host = HttpClient.getHostFromUrl(url);
         return new Request("get", host, HttpClient.getPathFromUrl(url, host), new ArrayList<String>());
     }
-
 }
