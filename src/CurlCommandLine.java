@@ -11,6 +11,7 @@ public class CurlCommandLine {
     public boolean haveFile;
     public String file;
     public String url;
+    public Request request;
 
     public CurlCommandLine() {
     }
@@ -93,5 +94,13 @@ public class CurlCommandLine {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Request getRequest() {
+        return request;
+    }
+
+    public void setRequest(Request request) {
+        this.request = request;
     }
 }

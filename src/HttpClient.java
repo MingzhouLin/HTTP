@@ -13,6 +13,7 @@ public class HttpClient {
 
     public static CurlCommandLine parseCurlCommandLine(String cmd){
         CurlCommandLine curlCommandLine = new CurlCommandLine();
+        Request request = new Request();
 
         String[] cmdArray = cmd.split(" ");
 
@@ -67,8 +68,39 @@ public class HttpClient {
 
         curlCommandLine.setUrl(cmdArray[cmdArray.length - 1]);
 
+        curlCommandLine.setRequest(configRequest(curlCommandLine));
+
         return curlCommandLine;
     }
+
+    private static Request configRequest(CurlCommandLine curlCommandLine) {
+        Request request = new Request();
+
+        String host = getHostFromUrl(curlCommandLine.getUrl());
+        String path = getPathFromUrl(curlCommandLine.getUrl(), host);
+
+        request.setPort(80);//default port
+        request.setHost(host);
+        request.setPath(path);
+        request.setRequestHeader(curlCommandLine.getHeaders());
+
+        return request;
+    }
+
+    private static String getHostFromUrl(String url) {
+        String[] splitUrl = url.split("//");
+        String hostAndPath = splitUrl[1];
+        String[] splitHostAndPath = hostAndPath.split("/");
+        String host = splitHostAndPath[0];
+        return host;
+    }
+
+    private static String getPathFromUrl(String url, String host) {
+        String[] splitUrl = url.split(host);
+        String path = splitUrl[1];
+        return path;
+    }
+
 
     private static String findTarget(String target, String[] cmdArray) {
         for (int i = 0; i < cmdArray.length; i++) {
@@ -93,7 +125,7 @@ public class HttpClient {
 
         CurlCommandLine commandLine = parseCurlCommandLine(cmd);
 
-        HttpLibrary httpLibrary = new HttpLibrary(commandLine);
+//        HttpLibrary httpLibrary = new HttpLibrary(commandLine);
 
         System.out.println(cmd);
     }
