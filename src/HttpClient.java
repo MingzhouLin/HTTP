@@ -97,17 +97,31 @@ public class HttpClient {
         request.setPort(80);//default port
         request.setHost(host);
         request.setPath(path);
-        request.setRequestHeaders(curlCommandLine.getHeaders());
+        if (curlCommandLine.getHeaders() != null) {
+            request.setRequestHeaders(curlCommandLine.getHeaders());
+        }else {
+            request.setRequestHeaders(new ArrayList<String>());
+        }
         request.requestType=curlCommandLine.requestType;
         if (curlCommandLine.haveInlineData){
-            request.requestBody= curlCommandLine.inlineData;
+            request.requestBody= formatRequestBody(curlCommandLine.inlineData);
+        }else if (curlCommandLine.haveFile){
+            request.requestBody= formatRequestBody(readFile(curlCommandLine.file));
+        }else {
+            request.requestBody="";
         }
-        if (curlCommandLine.haveFile){
-            request.requestBody+= readFile(curlCommandLine.file);
+        if (request.requestType.equals("post")) {
+            request.requestHeaders.add("Content-Length:" + request.requestBody.length());
         }
-        request.requestHeaders.add("Content-Length:"+request.requestBody.length());
 
         return request;
+    }
+
+    private static String formatRequestBody(String requestBody){
+        if (requestBody.contains("'")){
+            return requestBody.substring(1,requestBody.length()-1);
+        }
+        return requestBody;
     }
 
     private static String readFile(String path) {

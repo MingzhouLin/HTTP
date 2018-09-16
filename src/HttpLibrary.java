@@ -67,7 +67,7 @@ class Tool {
                     }
                 }
                 System.out.println(response);
-                System.out.println("The page had been moved. Redirect to : " + redirectLocation + "\n");
+                System.out.println("The page had been redirected to : " + redirectLocation + "\n");
                 return HttpLibrary.sendRequest(Tool.buildRequest(redirectLocation));
             } else if (statusCode >= 200 && statusCode < 300) {
                 //Without -v.
