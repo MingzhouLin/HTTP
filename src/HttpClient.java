@@ -193,6 +193,8 @@ public class HttpClient {
 
         HttpLibrary httpLibrary = new HttpLibrary(commandLine);
 
-        System.out.println(httpLibrary.send());
+        if (!commandLine.isHelp()) {
+            System.out.println(httpLibrary.send());
+        }
     }
 }
