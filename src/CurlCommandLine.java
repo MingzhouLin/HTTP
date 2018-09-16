@@ -11,6 +11,8 @@ public class CurlCommandLine {
     public boolean haveFile;
     public String file;
     public String url;
+    public boolean isHelp;
+    public boolean output;
     public Request request;
 
     public CurlCommandLine() {
@@ -102,5 +104,21 @@ public class CurlCommandLine {
 
     public void setRequest(Request request) {
         this.request = request;
+    }
+
+    public boolean isHelp() {
+        return isHelp;
+    }
+
+    public void setHelp(boolean help) {
+        isHelp = help;
+    }
+
+    public boolean isOutput() {
+        return output;
+    }
+
+    public void setOutput(boolean output) {
+        this.output = output;
     }
 }

@@ -16,6 +16,22 @@ public class HttpClient {
             curlCommandLine.setValid(false);
         }
 
+        if (cmd.contains("httpc") && cmd.contains("help")) {
+            curlCommandLine.setHelp(true);
+            System.out.println("httpc is a curl-like application but supports HTTP protocol only.\n" +
+                    "Usage:\n" +
+                    "    httpc command [arguments]\n" +
+                    "The commands are:\n" +
+                    "    get     executes a HTTP GET request and prints the response.\n" +
+                    "    post    executes a HTTP POST request and prints the response.\n" +
+                    "    help    prints this screen.\n" +
+                    "Use \"httpc help [command]\" for more information about a command.");
+
+            return curlCommandLine;
+        } else {
+            curlCommandLine.setHelp(false);
+        }
+
         if (cmd.contains("get")){
             curlCommandLine.setRequestType("get");
         }
@@ -41,7 +57,6 @@ public class HttpClient {
             curlCommandLine.setHeaders(headers);
         } else {
             curlCommandLine.setHaveHeaders(false);
-            curlCommandLine.setHeaders(new ArrayList<String>());
         }
 
         if (cmd.contains("-d")){
@@ -58,6 +73,12 @@ public class HttpClient {
             curlCommandLine.setFile(file);
         } else {
             curlCommandLine.setHaveFile(false);
+        }
+
+        if (cmd.contains("-o")) {
+            curlCommandLine.setOutput(true);
+        } else {
+            curlCommandLine.setOutput(false);
         }
 
         curlCommandLine.setUrl(cmdArray[cmdArray.length - 1]);
@@ -138,6 +159,15 @@ public class HttpClient {
 
         String notFind = "notFind";
         return notFind;
+    }
+
+    public static void writeFile(String content , String path) throws IOException {
+        File writename = new File(path);
+        writename.createNewFile();
+        BufferedWriter out = new BufferedWriter(new FileWriter(writename));
+        out.write(content);
+        out.flush();
+        out.close();
     }
 
     public static void main(String[] args) throws IOException {
