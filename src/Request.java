@@ -1,23 +1,25 @@
 import java.util.ArrayList;
-import java.util.Set;
 
 public class Request {
-    public int port;
+    public int port = 80;
     public String host;
     public String path;
-    public String httpVersionInfo;
+    public final String httpVersionInfo = "HTTP/1.0";
     public String queryParameter;
-    public ArrayList<String> requestHeader;
+    public ArrayList<String> requestHeaders;
     public String requestBody;
+    //need a request type.
+    public String requestType;
+    public final String endSign = "\r\n";
 
-    public Request(){}
+    public Request() {
+    }
 
-    public Request(int port, String host, String queryParameter, ArrayList<String> requestHeader, String requestBody) {
-        this.port = port;
+    public Request(String requestType, String host, String path, ArrayList<String> requestHeaders ) {
+        this.requestType = requestType;
         this.host = host;
-        this.queryParameter = queryParameter;
-        this.requestHeader = requestHeader;
-        this.requestBody = requestBody;
+        this.path = path;
+        this.requestHeaders = requestHeaders;
     }
 
     public int getPort() {
@@ -44,12 +46,12 @@ public class Request {
         this.queryParameter = queryParameter;
     }
 
-    public ArrayList<String> getRequestHeader() {
-        return requestHeader;
+    public ArrayList<String> getRequestHeaders() {
+        return requestHeaders;
     }
 
-    public void setRequestHeader(ArrayList<String> requestHeader) {
-        this.requestHeader = requestHeader;
+    public void setRequestHeaders(ArrayList<String> requestHeaders) {
+        this.requestHeaders = requestHeaders;
     }
 
     public String getRequestBody() {
@@ -68,11 +70,18 @@ public class Request {
         this.path = path;
     }
 
-    public String getHttpVersionInfo() {
-        return httpVersionInfo;
-    }
-
-    public void setHttpVersionInfo(String httpVersionInfo) {
-        this.httpVersionInfo = httpVersionInfo;
+    public String toString() {
+        StringBuilder request = new StringBuilder();
+        request.append(requestType.toUpperCase() + " " + path + " " + httpVersionInfo + endSign);
+        request.append("Host:" + host + endSign);
+        for (String header :
+                requestHeaders) {
+            request.append(header + endSign);
+        }
+        request.append(endSign);
+        if (requestType.equals("post")) {
+            request.append(requestBody + endSign);
+        }
+        return request.toString();
     }
 }

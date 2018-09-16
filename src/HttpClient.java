@@ -1,12 +1,5 @@
-import com.sun.deploy.net.HttpRequest;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 public class HttpClient {
@@ -48,6 +41,7 @@ public class HttpClient {
             curlCommandLine.setHeaders(headers);
         } else {
             curlCommandLine.setHaveHeaders(false);
+            curlCommandLine.setHeaders(new ArrayList<String>());
         }
 
         if (cmd.contains("-d")){
@@ -82,12 +76,39 @@ public class HttpClient {
         request.setPort(80);//default port
         request.setHost(host);
         request.setPath(path);
-        request.setRequestHeader(curlCommandLine.getHeaders());
+        request.setRequestHeaders(curlCommandLine.getHeaders());
+        request.requestType=curlCommandLine.requestType;
+        if (curlCommandLine.haveInlineData){
+            request.requestBody= curlCommandLine.inlineData;
+        }
+        if (curlCommandLine.haveFile){
+            request.requestBody+= readFile(curlCommandLine.file);
+        }
 
         return request;
     }
 
-    private static String getHostFromUrl(String url) {
+    private static String readFile(String path) {
+        StringBuffer buffer = new StringBuffer();
+        try {
+            InputStream input = new FileInputStream(path);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+            String line = reader.readLine();
+            while (line != null) {
+                buffer.append(line);
+                buffer.append("\n");
+                line = reader.readLine();
+            }
+
+            reader.close();
+            input.close();
+        }catch (IOException e){
+            System.out.println("IO fail");
+        }
+        return buffer.toString();
+    }
+
+    public static String getHostFromUrl(String url) {
         String[] splitUrl = url.split("//");
         String hostAndPath = splitUrl[1];
         String[] splitHostAndPath = hostAndPath.split("/");
@@ -95,7 +116,7 @@ public class HttpClient {
         return host;
     }
 
-    private static String getPathFromUrl(String url, String host) {
+    public static String getPathFromUrl(String url, String host) {
         String[] splitUrl = url.split(host);
         String path = splitUrl[1];
         return path;
@@ -119,14 +140,14 @@ public class HttpClient {
         return notFind;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
         String cmd = scanner.nextLine();
 
         CurlCommandLine commandLine = parseCurlCommandLine(cmd);
 
-//        HttpLibrary httpLibrary = new HttpLibrary(commandLine);
+        HttpLibrary httpLibrary = new HttpLibrary(commandLine);
 
-        System.out.println(cmd);
+        System.out.println(httpLibrary.send());
     }
 }
