@@ -61,7 +61,7 @@ public class HttpClient {
 
         if (cmd.contains("-d")){
             curlCommandLine.setHaveInlineData(true);
-            String inlineData = findTarget("-d", cmdArray);
+            String inlineData = findInlineData(cmd);
             curlCommandLine.setInlineData(inlineData);
         }else {
             curlCommandLine.setHaveInlineData(false);
@@ -77,15 +77,27 @@ public class HttpClient {
 
         if (cmd.contains("-o")) {
             curlCommandLine.setOutput(true);
+            curlCommandLine.setFile(cmdArray[cmdArray.length - 1]);
+            curlCommandLine.setUrl(cmdArray[cmdArray.length - 3]);
         } else {
             curlCommandLine.setOutput(false);
         }
 
-        curlCommandLine.setUrl(cmdArray[cmdArray.length - 1]);
+        if (!curlCommandLine.isOutput()) {
+            curlCommandLine.setUrl(cmdArray[cmdArray.length - 1]);
+        }
 
         curlCommandLine.setRequest(configRequest(curlCommandLine));
 
         return curlCommandLine;
+    }
+
+    private static String findInlineData(String cmd) {
+        String[] splidByDashd = cmd.split("-d ");
+        String dataPart = splidByDashd[1];
+        String[] splitBySingleQuote = dataPart.split("'");
+        String data = splitBySingleQuote[1];
+        return data;
     }
 
     private static Request configRequest(CurlCommandLine curlCommandLine) {
@@ -154,7 +166,10 @@ public class HttpClient {
 
     public static String getPathFromUrl(String url, String host) {
         String[] splitUrl = url.split(host);
-        String path = splitUrl[1];
+        String path = "/";
+        if (splitUrl.length != 1){
+            path = splitUrl[1];
+        }
         return path;
     }
 
