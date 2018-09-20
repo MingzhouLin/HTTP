@@ -13,6 +13,16 @@ public class CurlCommandLine {
     public String url;
     public boolean isHelp;
     public boolean output;
+    public String outputFile;
+
+    public String getOutputFile() {
+        return outputFile;
+    }
+
+    public void setOutputFile(String outputFile) {
+        this.outputFile = outputFile;
+    }
+
     public Request request;
 
     public CurlCommandLine() {

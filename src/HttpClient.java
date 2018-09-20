@@ -4,51 +4,65 @@ import java.util.Scanner;
 
 public class HttpClient {
 
-    public static CurlCommandLine parseCurlCommandLine(String cmd){
+    public static CurlCommandLine parseCurlCommandLine(String cmd) {
         CurlCommandLine curlCommandLine = new CurlCommandLine();
         Request request = new Request();
 
         String[] cmdArray = cmd.split(" ");
 
-        if (cmdArray[0].equals("httpc")){
+        if (cmdArray[0].equals("httpc")) {
             curlCommandLine.setValid(true);
-        } else{
+        } else {
             curlCommandLine.setValid(false);
         }
 
         if (cmd.contains("httpc") && cmd.contains("help")) {
             curlCommandLine.setHelp(true);
-            System.out.println("httpc is a curl-like application but supports HTTP protocol only.\n" +
-                    "Usage:\n" +
-                    "    httpc command [arguments]\n" +
-                    "The commands are:\n" +
-                    "    get     executes a HTTP GET request and prints the response.\n" +
-                    "    post    executes a HTTP POST request and prints the response.\n" +
-                    "    help    prints this screen.\n" +
-                    "Use \"httpc help [command]\" for more information about a command.");
-
+            if (cmd.contains("get")) {
+                System.out.println("usage: httpc get [-v] [-h key:value] URL\n" +
+                        "Get executes a HTTP GET request for a given URL.\n" +
+                        "-v           Prints the detail of the response such as protocol, status, and headers.\n" +
+                        "-h key:value Associates headers to HTTP Request with the format 'key:value'.\n");
+            } else if (cmd.contains("post")) {
+                System.out.println("usage: httpc post [-v] [-h key:value] [-d inline-data] [-f file] URL\n" +
+                        "Post executes a HTTP POST request for a given URL with inline data or from file.\n" +
+                        "-v           Prints the detail of the response such as protocol, status, and headers.\n" +
+                        "-h key:value Associates headers to HTTP Request with the format 'key:value'.\n" +
+                        "-d string    Associates an inline data to the body HTTP POST request.\n" +
+                        "-f file      Associates the content of a file to the body HTTP POST request.\n" +
+                        "Either [-d] or [-f] can be used but not both.\n");
+            }else {
+                System.out.println("httpc is a curl-like application but supports HTTP protocol only.\n" +
+                        "Usage:\n" +
+                        "    httpc command [arguments]\n" +
+                        "The commands are:\n" +
+                        "    get     executes a HTTP GET request and prints the response.\n" +
+                        "    post    executes a HTTP POST request and prints the response.\n" +
+                        "    help    prints this screen.\n" +
+                        "Use \"httpc help [command]\" for more information about a command.");
+            }
             return curlCommandLine;
         } else {
             curlCommandLine.setHelp(false);
         }
 
-        if (cmd.contains("get")){
+        if (cmd.contains("get")) {
             curlCommandLine.setRequestType("get");
         }
 
-        if (cmd.contains("post")){
+        if (cmd.contains("post")) {
             curlCommandLine.setRequestType("post");
         }
 
-        if (cmd.contains("-v")){
+        if (cmd.contains("-v")) {
             curlCommandLine.setVerbose(true);
         } else {
             curlCommandLine.setVerbose(false);
         }
 
-        if (cmd.contains("-h")){
+        if (cmd.contains("-h")) {
             curlCommandLine.setHaveHeaders(true);
-            String headerString = findTarget("-h",cmdArray);
+            String headerString = findTarget("-h", cmdArray);
             String[] headerSplit = headerString.split(";");
             ArrayList<String> headers = new ArrayList<>();
             for (int i = 0; i < headerSplit.length; i++) {
@@ -59,17 +73,17 @@ public class HttpClient {
             curlCommandLine.setHaveHeaders(false);
         }
 
-        if (cmd.contains("-d")){
+        if (cmd.contains("-d")) {
             curlCommandLine.setHaveInlineData(true);
-            String inlineData = findInlineData(cmd);
+            String inlineData = findContent(cmd, "-d ");
             curlCommandLine.setInlineData(inlineData);
-        }else {
+        } else {
             curlCommandLine.setHaveInlineData(false);
         }
 
         if (cmd.contains("-f")) {
             curlCommandLine.setHaveFile(true);
-            String file = findTarget("-f",cmdArray);
+            String file = findContent(cmd, "-f ");
             curlCommandLine.setFile(file);
         } else {
             curlCommandLine.setHaveFile(false);
@@ -77,7 +91,7 @@ public class HttpClient {
 
         if (cmd.contains("-o")) {
             curlCommandLine.setOutput(true);
-            curlCommandLine.setFile(cmdArray[cmdArray.length - 1]);
+            curlCommandLine.setOutputFile("./" + cmdArray[cmdArray.length - 1]);
             curlCommandLine.setUrl(cmdArray[cmdArray.length - 3]);
         } else {
             curlCommandLine.setOutput(false);
@@ -92,8 +106,8 @@ public class HttpClient {
         return curlCommandLine;
     }
 
-    private static String findInlineData(String cmd) {
-        String[] splidByDashd = cmd.split("-d ");
+    private static String findContent(String cmd, String mark) {
+        String[] splidByDashd = cmd.split(mark);
         String dataPart = splidByDashd[1];
         String[] splitBySingleQuote = dataPart.split("'");
         String data = splitBySingleQuote[1];
@@ -111,16 +125,16 @@ public class HttpClient {
         request.setPath(path);
         if (curlCommandLine.getHeaders() != null) {
             request.setRequestHeaders(curlCommandLine.getHeaders());
-        }else {
+        } else {
             request.setRequestHeaders(new ArrayList<String>());
         }
-        request.requestType=curlCommandLine.requestType;
-        if (curlCommandLine.haveInlineData){
-            request.requestBody= formatRequestBody(curlCommandLine.inlineData);
-        }else if (curlCommandLine.haveFile){
-            request.requestBody= formatRequestBody(readFile(curlCommandLine.file));
-        }else {
-            request.requestBody="";
+        request.requestType = curlCommandLine.requestType;
+        if (curlCommandLine.haveInlineData) {
+            request.requestBody = formatRequestBody(curlCommandLine.inlineData);
+        } else if (curlCommandLine.haveFile) {
+            request.requestBody = readFile(curlCommandLine.file);
+        } else {
+            request.requestBody = "";
         }
         if (request.requestType.equals("post")) {
             request.requestHeaders.add("Content-Length:" + request.requestBody.length());
@@ -129,9 +143,9 @@ public class HttpClient {
         return request;
     }
 
-    private static String formatRequestBody(String requestBody){
-        if (requestBody.contains("'")){
-            return requestBody.substring(1,requestBody.length()-1);
+    private static String formatRequestBody(String requestBody) {
+        if (requestBody.contains("'")) {
+            return requestBody.substring(1, requestBody.length() - 1);
         }
         return requestBody;
     }
@@ -143,14 +157,13 @@ public class HttpClient {
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
             String line = reader.readLine();
             while (line != null) {
-                buffer.append(line);
-                buffer.append("\n");
+                buffer.append(line.trim());
                 line = reader.readLine();
             }
 
             reader.close();
             input.close();
-        }catch (IOException e){
+        } catch (IOException e) {
             System.out.println("IO fail");
         }
         return buffer.toString();
@@ -167,7 +180,7 @@ public class HttpClient {
     public static String getPathFromUrl(String url, String host) {
         String[] splitUrl = url.split(host);
         String path = "/";
-        if (splitUrl.length != 1){
+        if (splitUrl.length != 1) {
             path = splitUrl[1];
         }
         return path;
@@ -191,7 +204,7 @@ public class HttpClient {
         return notFind;
     }
 
-    public static void writeFile(String content , String path) throws IOException {
+    public static void writeFile(String content, String path) throws IOException {
         File writename = new File(path);
         writename.createNewFile();
         BufferedWriter out = new BufferedWriter(new FileWriter(writename));
@@ -203,13 +216,24 @@ public class HttpClient {
     public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
         String cmd = scanner.nextLine();
+        while (!cmd.equals("exit")){
+            CurlCommandLine commandLine = parseCurlCommandLine(cmd);
 
-        CurlCommandLine commandLine = parseCurlCommandLine(cmd);
+            HttpLibrary httpLibrary = new HttpLibrary(commandLine);
 
-        HttpLibrary httpLibrary = new HttpLibrary(commandLine);
-
-        if (!commandLine.isHelp()) {
-            System.out.println(httpLibrary.send());
+            if (!commandLine.isHelp()) {
+                Response response = httpLibrary.send();
+                if (commandLine.output) {
+                    writeFile(response.body, commandLine.outputFile);
+                }
+                if (commandLine.verbose) {
+                    System.out.println(response.toString());
+                } else {
+                    System.out.println(response.body);
+                }
+            }
+            System.out.println("Input 'exit' to stop.");
+            cmd = scanner.nextLine();
         }
     }
 }

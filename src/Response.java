@@ -7,7 +7,7 @@ public class Response {
         this.body = body;
     }
 
-    public String toString(){
-        return header+body;
+    public String toString() {
+        return header + "\r\n\r\n" + body;
     }
 }

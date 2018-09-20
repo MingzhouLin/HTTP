@@ -1,3 +1,6 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -32,12 +35,14 @@ public class HttpLibrary {
         }
     }
 
-    public String send() throws IOException {
+    public Response send() throws IOException {
         Request request = curlCommandLine.request;
         String responseLine= sendRequest(request);
         Response response = Tool.convertToResponse(responseLine);
-        String result = Tool.handleResponse(curlCommandLine, response);
-        return result;
+        while (Tool.ifRedirection(response)){
+            response=Tool.redirect(response);
+        }
+        return response;
     }
 }
 
@@ -48,33 +53,27 @@ class Tool {
         return response;
     }
 
-    public static String handleResponse(CurlCommandLine curlCommandLine, Response response) throws IOException {
-        if (curlCommandLine.verbose) {
-            return response.toString();
-        } else {
-            /*
-                Redirection.
-             */
-            String[] elements = response.header.split("\r\n");
-            int statusCode = Integer.parseInt(elements[0].substring(9, 12));
-            if (statusCode > 300 && statusCode < 400) {
-                String redirectLocation = "";
-                for (String element :
-                        elements) {
-                    if (element.contains("Location: ")) {
-                        redirectLocation = element.substring(element.indexOf(":") + 1);
-                        break;
-                    }
-                }
-                System.out.println(response);
-                System.out.println("The page had been redirected to : " + redirectLocation + "\n");
-                return HttpLibrary.sendRequest(Tool.buildRequest(redirectLocation));
-            } else if (statusCode >= 200 && statusCode < 300) {
-                //Without -v.
-                return response.body;
+    public static boolean ifRedirection(Response response){
+        String[] elements = response.header.split("\r\n");
+        int statusCode = Integer.parseInt(elements[0].substring(9, 12));
+        if (statusCode > 300 && statusCode < 400) return true;
+        return false;
+    }
+
+    public static Response redirect(Response response) throws IOException {
+        String[] elements = response.header.split("\r\n");
+        String redirectLocation = "";
+        for (String element :
+                elements) {
+            if (element.contains("Location: ")) {
+                redirectLocation = element.substring(element.indexOf(":") + 1);
+                break;
             }
         }
-        return response.toString();
+        System.out.println(response);
+        System.out.println("The page had been redirected to : " + redirectLocation + "\n");
+        String redirectResponse= HttpLibrary.sendRequest(Tool.buildRequest(redirectLocation));
+        return convertToResponse(redirectResponse);
     }
 
     public static Request buildRequest(String url){
