@@ -1,6 +1,3 @@
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -9,7 +6,6 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class HttpLibrary {
     public static Charset utf8 = StandardCharsets.UTF_8;
@@ -49,8 +45,12 @@ public class HttpLibrary {
 class Tool {
     public static Response convertToResponse(String responseLine) {
         String[] seperate = responseLine.split("\r\n\r\n");
-        Response response = new Response(seperate[0], seperate[1]);
-        return response;
+        if (seperate.length==2) {
+            return new Response(seperate[0], seperate[1]);
+        }else if (seperate.length==1){
+            return new Response(seperate[0], "");
+        }
+        return new Response();
     }
 
     public static boolean ifRedirection(Response response){
@@ -77,7 +77,7 @@ class Tool {
     }
 
     public static Request buildRequest(String url){
-        String host = HttpClient.getHostFromUrl(url);
-        return new Request("get", host, HttpClient.getPathFromUrl(url, host), new ArrayList<String>());
+        String host = httpc.getHostFromUrl(url);
+        return new Request("get", host, httpc.getPathFromUrl(url, host), new ArrayList<String>());
     }
 }

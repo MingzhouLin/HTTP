@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class HttpClient {
+public class httpc {
 
     public static CurlCommandLine parseCurlCommandLine(String cmd) {
         CurlCommandLine curlCommandLine = new CurlCommandLine();
@@ -10,13 +10,7 @@ public class HttpClient {
 
         String[] cmdArray = cmd.split(" ");
 
-        if (cmdArray[0].equals("httpc")) {
-            curlCommandLine.setValid(true);
-        } else {
-            curlCommandLine.setValid(false);
-        }
-
-        if (cmd.contains("httpc") && cmd.contains("help")) {
+        if (cmd.contains("help")) {
             curlCommandLine.setHelp(true);
             if (cmd.contains("get")) {
                 System.out.println("usage: httpc get [-v] [-h key:value] URL\n" +
@@ -178,11 +172,8 @@ public class HttpClient {
     }
 
     public static String getPathFromUrl(String url, String host) {
-        String[] splitUrl = url.split(host);
-        String path = "/";
-        if (splitUrl.length != 1) {
-            path = splitUrl[1];
-        }
+        int position = url.indexOf(host);
+        String path = url.substring(position + host.length() ,url.length());
         return path;
     }
 

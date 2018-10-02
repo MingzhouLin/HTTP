@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 public class CurlCommandLine {
-    public boolean valid;
+    public final boolean valid = true;
     public String requestType;
     public boolean verbose;
     public boolean haveHeaders;
@@ -32,9 +32,6 @@ public class CurlCommandLine {
         return valid;
     }
 
-    public void setValid(boolean valid) {
-        this.valid = valid;
-    }
 
     public String getRequestType() {
         return requestType;
