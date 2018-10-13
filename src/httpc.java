@@ -114,7 +114,6 @@ public class httpc {
         String host = getHostFromUrl(curlCommandLine.getUrl());
         String path = getPathFromUrl(curlCommandLine.getUrl(), host);
 
-        request.setPort(80);//default port
         request.setHost(host);
         request.setPath(path);
         if (curlCommandLine.getHeaders() != null) {

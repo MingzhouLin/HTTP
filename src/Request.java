@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 public class Request {
-    public int port = 80;
+    public int port = 8080;
     public String host;
     public String path;
     public final String httpVersionInfo = "HTTP/1.0";

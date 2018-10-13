@@ -1,3 +1,4 @@
+Direct to HTTP/src
 'javac httpc'
 'java httpc'
 get -v http://httpbin.org/get?course=networking&assignment=1

@@ -18,6 +18,7 @@ public class HttpLibrary {
     public static String sendRequest(Request request) throws IOException {
         System.out.println(request);
         SocketAddress endpoint = new InetSocketAddress(request.host, request.port);
+        System.out.println(request.host+request.port);
         try (SocketChannel socket = SocketChannel.open()) {
             socket.connect(endpoint);
             ByteBuffer buf = utf8.encode(request.toString());
