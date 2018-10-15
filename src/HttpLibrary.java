@@ -18,7 +18,6 @@ public class HttpLibrary {
     public static String sendRequest(Request request) throws IOException {
         System.out.println(request);
         SocketAddress endpoint = new InetSocketAddress(request.host, request.port);
-        System.out.println(request.host+request.port);
         try (SocketChannel socket = SocketChannel.open()) {
             socket.connect(endpoint);
             ByteBuffer buf = utf8.encode(request.toString());
@@ -32,13 +31,18 @@ public class HttpLibrary {
         }
     }
 
-    public Response send() throws IOException {
+    public Response send(){
         Request request = curlCommandLine.request;
-        String responseLine= sendRequest(request);
-        Response response = Tool.convertToResponse(responseLine);
-        while (Tool.ifRedirection(response)){
-            response=Tool.redirect(response);
+        String responseLine= null;
+        try {
+            responseLine = sendRequest(request);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        Response response = Tool.convertToResponse(responseLine);
+//        while (Tool.ifRedirection(response)){
+//            response=Tool.redirect(response);
+//        }
         return response;
     }
 }

@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
 
 public class httpc {
 
@@ -25,7 +26,7 @@ public class httpc {
                         "-d string    Associates an inline data to the body HTTP POST request.\n" +
                         "-f file      Associates the content of a file to the body HTTP POST request.\n" +
                         "Either [-d] or [-f] can be used but not both.\n");
-            }else {
+            } else {
                 System.out.println("httpc is a curl-like application but supports HTTP protocol only.\n" +
                         "Usage:\n" +
                         "    httpc command [arguments]\n" +
@@ -172,7 +173,7 @@ public class httpc {
 
     public static String getPathFromUrl(String url, String host) {
         int position = url.indexOf(host);
-        String path = url.substring(position + host.length() ,url.length());
+        String path = url.substring(position + host.length(), url.length());
         return path;
     }
 
@@ -205,23 +206,41 @@ public class httpc {
 
     public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Select Test Mode: 1-single thread, 2-multi-threads");
+        int option = scanner.nextInt();
+        scanner.nextLine();
+        System.out.println("Input your request");
         String cmd = scanner.nextLine();
-        while (!cmd.equals("exit")){
+        while (!cmd.equals("exit")) {
             CurlCommandLine commandLine = parseCurlCommandLine(cmd);
 
             HttpLibrary httpLibrary = new HttpLibrary(commandLine);
-
-            if (!commandLine.isHelp()) {
-                Response response = httpLibrary.send();
-                if (commandLine.output) {
-                    writeFile(response.body, commandLine.outputFile);
+            if (option == 1) {
+                if (!commandLine.isHelp()) {
+                    Response response = httpLibrary.send();
+                    if (commandLine.output) {
+                        writeFile(response.body, commandLine.outputFile);
+                    }
+                    if (commandLine.verbose) {
+                        System.out.println(response.toString());
+                    } else {
+                        System.out.println(response.body);
+                    }
                 }
-                if (commandLine.verbose) {
-                    System.out.println(response.toString());
-                } else {
-                    System.out.println(response.body);
-                }
+            } else {
+                System.out.println("Input your second request");
+                String cmd1 = scanner.nextLine();
+                CurlCommandLine commandLine1 = parseCurlCommandLine(cmd1);
+                HttpLibrary httpLibrary1 = new HttpLibrary(commandLine1);
+                CompletableFuture<Response> response = CompletableFuture.supplyAsync(() -> httpLibrary.send());
+                CompletableFuture<Response> response1= CompletableFuture.supplyAsync(()->httpLibrary1.send());
+                response.thenAccept(reply-> System.out.println(reply.toString()));
+                response1.thenAccept(reply1-> System.out.println(reply1.toString()));
             }
+            System.out.println("Select Test Mode: 1-single thread, 2-multi-threads");
+            option = scanner.nextInt();
+            scanner.nextLine();
+            System.out.println("Input your request");
             System.out.println("Input 'exit' to stop.");
             cmd = scanner.nextLine();
         }
