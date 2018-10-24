@@ -6,3 +6,4 @@ HTTP.iml
 out/
 input.txt
 output.txt
+src/*.class

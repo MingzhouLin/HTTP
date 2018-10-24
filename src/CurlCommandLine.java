@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 public class CurlCommandLine {
     public final boolean valid = true;
+    public int port = 8080;
     public String requestType;
     public boolean verbose;
     public boolean haveHeaders;
@@ -26,6 +27,14 @@ public class CurlCommandLine {
     public Request request;
 
     public CurlCommandLine() {
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     public boolean isValid() {

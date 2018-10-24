@@ -8,7 +8,7 @@ public class Request {
     public String queryParameter;
     public ArrayList<String> requestHeaders;
     public String requestBody;
-    //need a request type.
+    //need a request operation.
     public String requestType;
     public final String endSign = "\r\n";
 

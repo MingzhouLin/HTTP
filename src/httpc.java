@@ -92,6 +92,11 @@ public class httpc {
             curlCommandLine.setOutput(false);
         }
 
+        if (cmd.contains("-p")){
+            int port=Integer.parseInt(findContent(cmd, "-p "));
+            curlCommandLine.setPort(port);
+        }
+
         if (!curlCommandLine.isOutput()) {
             curlCommandLine.setUrl(cmdArray[cmdArray.length - 1]);
         }
@@ -115,6 +120,7 @@ public class httpc {
         String host = getHostFromUrl(curlCommandLine.getUrl());
         String path = getPathFromUrl(curlCommandLine.getUrl(), host);
 
+        request.setPort(curlCommandLine.port);
         request.setHost(host);
         request.setPath(path);
         if (curlCommandLine.getHeaders() != null) {
