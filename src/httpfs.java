@@ -166,7 +166,7 @@ public class httpfs {
     }
 
     private boolean startWithDot(String path){
-        String pattern = "\\.*";
+        String pattern = "/\\..*";
         boolean isMatch = Pattern.matches(pattern, path);
         return isMatch;
     }
