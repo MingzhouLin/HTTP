@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 public class httpfs {
     public static Charset utf8 = StandardCharsets.UTF_8;
@@ -148,7 +149,7 @@ public class httpfs {
             if (content.path.equals("/")) {
                 return readFileList();
             } else {
-                if (content.path.equals("/..")) {
+                if (startWithDot(content.path)) {
                     String errorMessage = "Error:401 Unauthorized";
                     if (debugMessage) {
                         System.out.println(errorMessage);
@@ -162,6 +163,12 @@ public class httpfs {
         } else {
             return writeFile(content.text, content.path);
         }
+    }
+
+    private boolean startWithDot(String path){
+        String pattern = "\\.*";
+        boolean isMatch = Pattern.matches(pattern, path);
+        return isMatch;
     }
 
     private String readFile(Content content) {
