@@ -131,6 +131,7 @@ public class httpfs {
                 case "txt": {
                     builder.append("Content-Type: text/plain\r\n");
                     builder.append("Content-Disposition: inline\r\n");
+                    break;
                 }
                 default: {
                     builder.append("Content-Type: text/plain\r\n");

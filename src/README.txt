@@ -17,6 +17,7 @@ javac -Djava.ext.dirs=./ httpfs.java
 java -Djava.ext.dirs=./ httpfs
 get -v http://localhost/
 get  -v http://localhost/fresh.txt
-post -d '{"assignment":1}' http://localhost/assignment.txt
+post -v -d '{"assignment":1}' http://localhost/assignment.txt
+post -v -d '{"lesson": "network"}' http://localhost/assignment.txt
 get -v http://localhost/dfafsaf
 get -v http://localhost/..

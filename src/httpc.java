@@ -224,6 +224,12 @@ public class httpc {
             if (option == 1) {
                 if (!commandLine.isHelp()) {
                     Response response = httpLibrary.send();
+                    for (String header :
+                            response.header.split("\r\n")) {
+                        if (header.contains("Content-Disposition: attachment")) {
+                            writeFile(response.body, "/Users/linmingzhou/Documents/Concordia/Comp 6461/HTTP/output.txt");
+                        }
+                    }
                     if (commandLine.output) {
                         writeFile(response.body, commandLine.outputFile);
                     }
