@@ -44,14 +44,14 @@ public class RecvBuffer extends Manager {
         switch (msg) {
             case END_OF_DATA:
                 this.endSeqNum = packet.getSequenceNumber();
-                logger.debug("Receive an end of data packet, endSeqNum = # {}", this.endSeqNum);
+                logger.info("Receive an end of data packet, endSeqNum = # {}", this.endSeqNum);
             case DATA:
-                logger.debug("RecvBuffer receive a packet, handling ...");
+                logger.info("RecvBuffer receive a packet, handling ...");
                 Packet p = this.handleDataPacket(packet);
                 SocketAddress addr = new InetSocketAddress(p.getPeerAddress(), p.getPeerPort());
                 // ACK do not need to go through the thread since it doesn't need a timer
                 this.thread.getChannel().send(p.toBuffer(), this.rounter);
-                logger.debug("An ACK for packet #{} has been sent", packet.getSequenceNumber());
+                logger.info("An ACK for packet #{} has been sent", packet.getSequenceNumber());
                 break;
             case SYN:
                 long initialSeqNum = packet.getSequenceNumber() + 1;
@@ -103,7 +103,7 @@ public class RecvBuffer extends Manager {
                 this.window[idx] = p;
                 this.checkAndMove();
             } else {
-                logger.debug("Already received it or not expecting packet # {}", seqNum);
+                logger.info("Already received it or not expecting packet # {}", seqNum);
             }
             // generate an ACK for that packet and send it back to the sender
             // no matter the packet is the one we are waiting for or not

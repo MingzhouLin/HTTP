@@ -18,8 +18,8 @@ public class Packet {
     public static final int END = 4;
 
     public static final int MIN_LEN = 11;
-    public static final int MAX_LEN = 11 + 1024;
-    public static final int MAX_DATA = 1024;
+    public static final int MAX_LEN = 11 + 1013;
+    public static final int MAX_DATA = 1013;
 
     private final int type;
     private final long sequenceNumber;
@@ -176,9 +176,5 @@ public class Packet {
         public Packet create() {
             return new Packet(type, sequenceNumber, peerAddress, portNumber, payload);
         }
-    }
-
-    public enum Type {
-        DATA, ACK, SYN, SYN_ACK, SYN_ACK_ACK, NAK;
     }
 }

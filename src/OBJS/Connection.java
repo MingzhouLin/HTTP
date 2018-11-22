@@ -127,11 +127,15 @@ public class Connection extends Manager {
                     .setType(type)
                     .setSequenceNumber(++this.localSeqNum)
                     .setPortNumber(this.targetAddress.getPort())
-                    .setPeerAddress(this.targetAddress.getAddress())
+                    .setPeerAddress(targetAddress.getAddress())
                     .setPayload(tmp)
                     .create();
             packets[i] = p;
         }
         return packets;
+    }
+
+    public InetSocketAddress getTargetAddress() {
+        return targetAddress;
     }
 }

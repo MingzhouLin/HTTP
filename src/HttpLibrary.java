@@ -54,7 +54,8 @@ public class HttpLibrary {
         try {
             client.send(request.toString());
             ByteBuffer buf = ByteBuffer.allocate(65534);
-            client.receive(buf);
+            int length = client.receive(buf);
+            buf.flip();
             responseLine = utf8.decode(buf).toString();
         } catch (IOException e) {
             e.printStackTrace();

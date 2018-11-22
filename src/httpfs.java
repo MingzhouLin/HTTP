@@ -30,8 +30,8 @@ public class httpfs {
 
     private void handleRequest(ServerUDP server) {
         ByteBuffer buf = ByteBuffer.allocate(65534);
-        buf.flip();
         int length = server.receive(buf);
+        buf.flip();
         String request = utf8.decode(buf).toString();
         buf.clear();
         Content content = constructContent(request);

@@ -55,7 +55,7 @@ public class SendBuffer extends Manager {
                         && packet.getSequenceNumber() == basePacket.getSequenceNumber()) {
                     this.terminateTimer(packet.getSequenceNumber());
                     this.slideWindow();
-                    logger.debug("Current basePacket # {} was acked, slide down window",
+                    logger.info("Current basePacket # {} was acked, slide down window",
                             packet.getSequenceNumber());
                 } else if (packet != null){
                     this.terminateTimer(packet.getSequenceNumber());

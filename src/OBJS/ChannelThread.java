@@ -33,6 +33,7 @@ public class ChannelThread extends Subject implements Runnable {
         this.routerAddress = routerAddress;
         this.queue = new LinkedList<>();
         this.sendBuffer = new SendBuffer(queue, this);
+        this.subscribe(sendBuffer);
     }
 
     @Override

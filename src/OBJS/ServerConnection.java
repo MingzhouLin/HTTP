@@ -20,8 +20,8 @@ public class ServerConnection extends Connection {
 
     private SocketAddress router;
     private ChannelThread channelThread;
-    private InetSocketAddress targetAddress;
     private boolean connected;
+    private InetSocketAddress targetAddress;
     private HashMap<Long, Timer> timerMap;
 
     public ServerConnection(ChannelThread thread, SocketAddress routerAddress) {
@@ -102,5 +102,44 @@ public class ServerConnection extends Connection {
         timerMap.put(p.getSequenceNumber(), timer);
         this.channelThread.getChannel().send(p.toBuffer(), this.router);
         new Thread(timer).start();
+    }
+
+    public Packet[] makeChunks(byte[] message) {
+        int mLen = message.length;
+        int packetAmt = (mLen / Packet.MAX_DATA) + 1;
+        int offset = 0;
+
+        Packet[] packets = new Packet[packetAmt + 1];
+        for (int i = 0; i < packets.length; i++) {
+            byte[] tmp = new byte[Packet.MAX_DATA];
+            int len = (mLen - offset < Packet.MAX_DATA) ? mLen - offset : Packet.MAX_DATA;
+            System.arraycopy(message, offset, tmp, 0, len);
+
+            int type;
+            if (i == packets.length - 1) {
+                type = Packet.END;
+                tmp = "".getBytes();
+            } else {
+                type = Packet.DATA;
+            }
+            Packet p = new Packet.Builder()
+                    .setType(type)
+                    .setSequenceNumber(++this.localSeqNum)
+                    .setPortNumber(this.targetAddress.getPort())
+                    .setPeerAddress(targetAddress.getAddress())
+                    .setPayload(tmp)
+                    .create();
+            packets[i] = p;
+        }
+        return packets;
+    }
+
+    public InetSocketAddress getTargetAddress() {
+        return targetAddress;
+    }
+
+    @Override
+    public boolean isConnected() {
+        return connected;
     }
 }
