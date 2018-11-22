@@ -21,3 +21,6 @@ post -v -d '{"assignment":1}' http://localhost/assignment.txt
 post -v -d '{"lesson": "network"}' http://localhost/assignment.txt
 get -v http://localhost/dfafsaf
 get -v http://localhost/..
+
+./router --port=3000 --drop-rate=0.2 --max-delay=100ms --seed 1223243
+-v -p 8007 -d file

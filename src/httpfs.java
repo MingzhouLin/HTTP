@@ -1,3 +1,4 @@
+import RUDP.ServerUDP;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
@@ -27,36 +28,19 @@ public class httpfs {
         this.directoryPath = directoryPath;
     }
 
-    private void handleRequest(SocketChannel socket) {
-        try (SocketChannel client = socket) {
-            ByteBuffer buf = ByteBuffer.allocate(1024);
-            while (true) {
-                int nr = client.read(buf);
-
-                if (nr == -1)
-                    break;
-
-                if (nr > 0) {
-                    buf.flip();
-                    String request = utf8.decode(buf).toString();
-                    buf.clear();
-                    Content content = constructContent(request);
-                    CompletableFuture
-                            .supplyAsync(() -> process(content))
-                            .thenAccept(s -> {
-                                String responds = constructResponse(s, content);
-                                ByteBuffer buff = utf8.encode(responds);
-                                try {
-                                    client.write(buff);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                buff.clear();
-                            });
-                }
-            }
+    private void handleRequest(ServerUDP server) {
+        ByteBuffer buf = ByteBuffer.allocate(65534);
+        buf.flip();
+        int length = server.receive(buf);
+        String request = utf8.decode(buf).toString();
+        buf.clear();
+        Content content = constructContent(request);
+        String s=process(content);
+        String responds = constructResponse(s, content);
+        try {
+            server.send(responds);
         } catch (IOException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 
@@ -166,7 +150,7 @@ public class httpfs {
         }
     }
 
-    private boolean startWithDot(String path){
+    private boolean startWithDot(String path) {
         String pattern = "/\\..*";
         boolean isMatch = Pattern.matches(pattern, path);
         return isMatch;
@@ -237,27 +221,28 @@ public class httpfs {
         }
     }
 
-    private void listenAndServe() throws IOException {
-        try (ServerSocketChannel server = ServerSocketChannel.open()) {
-            server.bind(new InetSocketAddress(port));
-            System.out.println("server is listening at " + port);
-            while (true) {
-                SocketChannel client = server.accept();
-                // We may use a custom Executor instead of ForkJoinPool in a real-world application
-                handleRequest(client);
-            }
-        }
-    }
+//    private void listenAndServe() throws IOException {
+//        try (ServerSocketChannel server = ServerSocketChannel.open()) {
+//            server.bind(new InetSocketAddress(port));
+//            System.out.println("server is listening at " + port);
+//            while (true) {
+//                SocketChannel client = server.accept();
+//                // We may use a custom Executor instead of ForkJoinPool in a real-world application
+//                handleRequest(client);
+//            }
+//        }
+//    }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         String startLine = scanner.nextLine();
         OptionSet opts = parser(startLine);
-        httpfs server = new httpfs((int) opts.valueOf("p"), (boolean) opts.has("v"), (String) opts.valueOf("d"));
         try {
-            server.listenAndServe();
+            httpfs httpfs = new httpfs((int) opts.valueOf("p"), opts.has("v"), (String) opts.valueOf("d"));
+            ServerUDP server = new ServerUDP((int) opts.valueOf("p"));
+            httpfs.handleRequest(server);
         } catch (IOException e) {
-            System.out.println("error");
+            e.printStackTrace();
         }
     }
 

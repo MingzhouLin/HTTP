@@ -2,7 +2,8 @@ import java.util.ArrayList;
 
 public class CurlCommandLine {
     public final boolean valid = true;
-    public int port = 8080;
+    public int serverPort = 8007;
+    public int routerPort = 3000;
     public String requestType;
     public boolean verbose;
     public boolean haveHeaders;
@@ -29,14 +30,6 @@ public class CurlCommandLine {
     public CurlCommandLine() {
     }
 
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
     public boolean isValid() {
         return valid;
     }
@@ -48,6 +41,22 @@ public class CurlCommandLine {
 
     public void setRequestType(String requestType) {
         this.requestType = requestType;
+    }
+
+    public int getServerPort() {
+        return serverPort;
+    }
+
+    public void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
+    }
+
+    public int getRouterPort() {
+        return routerPort;
+    }
+
+    public void setRouterPort(int routerPort) {
+        this.routerPort = routerPort;
     }
 
     public boolean isVerbose() {

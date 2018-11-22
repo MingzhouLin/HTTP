@@ -1,7 +1,8 @@
 import java.util.ArrayList;
 
 public class Request {
-    public int port = 8080;
+    public int serverPort = 8007;
+    public int routerPort = 3000;
     public String host;
     public String path;
     public final String httpVersionInfo = "HTTP/1.0";
@@ -22,12 +23,20 @@ public class Request {
         this.requestHeaders = requestHeaders;
     }
 
-    public int getPort() {
-        return port;
+    public int getServerPort() {
+        return serverPort;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
+    }
+
+    public int getRouterPort() {
+        return routerPort;
+    }
+
+    public void setRouterPort(int routerPort) {
+        this.routerPort = routerPort;
     }
 
     public String getHost() {

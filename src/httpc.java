@@ -1,3 +1,5 @@
+import RUDP.ClientUDP;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -92,9 +94,14 @@ public class httpc {
             curlCommandLine.setOutput(false);
         }
 
-        if (cmd.contains("-p")){
-            int port=Integer.parseInt(findContent(cmd, "-p "));
-            curlCommandLine.setPort(port);
+        if (cmd.contains("-server-port")){
+            int port=Integer.parseInt(findContent(cmd, "-server-port "));
+            curlCommandLine.setServerPort(port);
+        }
+
+        if (cmd.contains("-router-port")){
+            int port=Integer.parseInt(findContent(cmd, "-router-port "));
+            curlCommandLine.setRouterPort(port);
         }
 
         if (!curlCommandLine.isOutput()) {
@@ -120,7 +127,8 @@ public class httpc {
         String host = getHostFromUrl(curlCommandLine.getUrl());
         String path = getPathFromUrl(curlCommandLine.getUrl(), host);
 
-        request.setPort(curlCommandLine.port);
+        request.setRouterPort(curlCommandLine.routerPort);
+        request.setServerPort(curlCommandLine.serverPort);
         request.setHost(host);
         request.setPath(path);
         if (curlCommandLine.getHeaders() != null) {
@@ -211,6 +219,7 @@ public class httpc {
     }
 
     public static void main(String[] args) throws IOException {
+        ClientUDP client = new ClientUDP(8098, 8007);
         Scanner scanner = new Scanner(System.in);
         System.out.println("Select Test Mode: 1-single thread, 2-multi-threads");
         int option = scanner.nextInt();
@@ -223,16 +232,8 @@ public class httpc {
             HttpLibrary httpLibrary = new HttpLibrary(commandLine);
             if (option == 1) {
                 if (!commandLine.isHelp()) {
-                    Response response = httpLibrary.send();
-                    for (String header :
-                            response.header.split("\r\n")) {
-                        if (header.contains("Content-Disposition: attachment")) {
-                            writeFile(response.body, "/Users/linmingzhou/Documents/Concordia/Comp 6461/HTTP/output.txt");
-                        }
-                    }
-                    if (commandLine.output) {
-                        writeFile(response.body, commandLine.outputFile);
-                    }
+                    Response response = httpLibrary.send(client);
+
                     if (commandLine.verbose) {
                         System.out.println(response.toString());
                     } else {
@@ -244,8 +245,8 @@ public class httpc {
                 String cmd1 = scanner.nextLine();
                 CurlCommandLine commandLine1 = parseCurlCommandLine(cmd1);
                 HttpLibrary httpLibrary1 = new HttpLibrary(commandLine1);
-                CompletableFuture<Response> response = CompletableFuture.supplyAsync(() -> httpLibrary.send());
-                CompletableFuture<Response> response1= CompletableFuture.supplyAsync(()->httpLibrary1.send());
+                CompletableFuture<Response> response = CompletableFuture.supplyAsync(() -> httpLibrary.send(client));
+                CompletableFuture<Response> response1= CompletableFuture.supplyAsync(()->httpLibrary1.send(client));
                 response.thenAccept(reply-> System.out.println(reply.toString()));
                 response1.thenAccept(reply1-> System.out.println(reply1.toString()));
             }
