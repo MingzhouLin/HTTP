@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.DatagramChannel;
+import java.util.HashMap;
 
 public class Connection extends Manager {
     private static final Logger logger = LoggerFactory.getLogger(Connection.class);
@@ -21,6 +22,7 @@ public class Connection extends Manager {
     private SocketAddress routerAddress;
     private ChannelThread thread;
     private boolean connected;
+    private HashMap<Long, Timer> timerMap;
 
     public Connection() {
     }
@@ -29,6 +31,7 @@ public class Connection extends Manager {
         this.thread = thread;
         this.routerAddress = routerAddress;
         this.localSeqNum = 1000;
+        this.timerMap = new HashMap<>();
     }
 
     public void connect(InetSocketAddress targetAddress)
@@ -46,7 +49,7 @@ public class Connection extends Manager {
                 .setPayload("Hi".getBytes())
                 .create();
 
-        this.thread.getChannel().send(packet.toBuffer(), this.routerAddress);
+        this.sendSYN(packet);
         logger.info("Handshaking #1 SYN packet has already sent out");
     }
 
@@ -61,6 +64,9 @@ public class Connection extends Manager {
                 if (this.localSeqNum + 1 == packet.getSequenceNumber()) {
                     logger.info("Handshaking #2 ACK_SYN packet has received");
                     this.connected = true;
+                    if (timerMap.containsKey(this.localSeqNum)) {
+                        timerMap.get(this.localSeqNum).setAcked(true);
+                    }
                     logger.info("Handshaking success, connection established");
                 }
                 break;
@@ -74,10 +80,29 @@ public class Connection extends Manager {
                         .setPayload("".getBytes())
                         .create();
 
-//                this.channelThread.getChannel().send(p.toBuffer(), this.router);
                 this.thread.getChannel().send(p.toBuffer(), this.routerAddress);
                 logger.info("Handshaking #3 ACK_SYN packet has sent out");
+            case TIME_OUT:
+                // get current packet's timer, check the status
+                long key = packet.getSequenceNumber();
+                Timer timer = this.timerMap.get(key);
+                if (timer != null && !timer.isAcked()) {
+                    this.thread.getChannel().send(packet.toBuffer(), this.thread.getRouterAddress());
+                    new Thread(timer).start();
+                    logger.info("Time out happen packet # {}", key);
+                } else {
+                    // no real timeout, it is time to remove this timer
+                    this.timerMap.remove(key);
+                }
         }
+    }
+
+    private void sendSYN(Packet p) throws IOException {
+        Timer timer = new Timer(p);
+        timer.subscribe(this);
+        timerMap.put(p.getSequenceNumber(), timer);
+        this.thread.getChannel().send(p.toBuffer(), this.routerAddress);
+        new Thread(timer).start();
     }
 
     public Packet[] makeChunks(byte[] message) {
