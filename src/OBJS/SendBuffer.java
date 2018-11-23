@@ -40,7 +40,6 @@ public class SendBuffer extends Manager {
                 // every time when we are adding packet into the
                 // buffer, the following codes will be invoked
                 if (this.timerMap.isEmpty()) {
-                    //TODO:Consider modification!!!
                     this.basePacket = packet;
                     this.lastPacket = packet;
                     this.send(packet);

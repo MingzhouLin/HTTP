@@ -87,7 +87,10 @@ public class RecvBuffer extends Manager {
             result.clear();
             result.put(tmp);
             this.buffer.clear();
+            this.window=new Packet[this.WIN_SIZE];
         }
+        this.curMinNum++;
+        this.endSeqNum=-3;
 
         return len;
     }
