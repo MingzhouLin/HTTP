@@ -3,17 +3,13 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
 import java.io.*;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Scanner;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 public class httpfs {
