@@ -71,8 +71,8 @@ public class ChannelThread extends Subject implements Runnable {
     private void write(SelectionKey k) throws IOException {
         DatagramChannel channel = (DatagramChannel) k.channel();
         synchronized (queue) {
-            int i = 0;
             int time = this.sendBuffer.getHasSth2Send();
+            int i=sendBuffer.getIndexOfQueue();
             while (time > 0) {
                 Packet p = this.queue.get(i);
                 channel.send(p.toBuffer(), this.routerAddress);
@@ -82,6 +82,7 @@ public class ChannelThread extends Subject implements Runnable {
                 i++;
             }
             this.sendBuffer.setHasSth2Send(time);
+            this.sendBuffer.setIndexOfQueue(i);
         }
         k.interestOps(OP_READ);
     }

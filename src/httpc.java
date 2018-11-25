@@ -1,11 +1,15 @@
 import RUDP.ClientUDP;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 
 public class httpc {
+    public static Charset utf8 = StandardCharsets.UTF_8;
 
     public static CurlCommandLine parseCurlCommandLine(String cmd) {
         CurlCommandLine curlCommandLine = new CurlCommandLine();
@@ -232,8 +236,16 @@ public class httpc {
             HttpLibrary httpLibrary = new HttpLibrary(commandLine);
             if (option == 1) {
                 if (!commandLine.isHelp()) {
-                    Response response = httpLibrary.send(client);
+                    String responseLine = "";
+                    //send
+                    httpLibrary.send(client);
 
+                    //receive
+                    ByteBuffer buf = ByteBuffer.allocate(65534);
+                    int length = client.receive(buf);
+                    buf.flip();
+                    responseLine = utf8.decode(buf).toString();
+                    Response response = Tool.convertToResponse(responseLine);
                     if (commandLine.verbose) {
                         System.out.println(response.toString());
                     } else {
@@ -245,10 +257,17 @@ public class httpc {
                 String cmd1 = scanner.nextLine();
                 CurlCommandLine commandLine1 = parseCurlCommandLine(cmd1);
                 HttpLibrary httpLibrary1 = new HttpLibrary(commandLine1);
-                CompletableFuture<Response> response = CompletableFuture.supplyAsync(() -> httpLibrary.send(client));
-                CompletableFuture<Response> response1= CompletableFuture.supplyAsync(()->httpLibrary1.send(client));
-                response.thenAccept(reply-> System.out.println(reply.toString()));
-                response1.thenAccept(reply1-> System.out.println(reply1.toString()));
+                new Thread(()->httpLibrary.send(client)).start();
+                new Thread(()->httpLibrary1.send(client)).start();
+                for (int i = 0; i <2; i++) {
+                    String responseLine = "";
+                    ByteBuffer buf = ByteBuffer.allocate(65534);
+                    int length = client.receive(buf);
+                    buf.flip();
+                    responseLine = utf8.decode(buf).toString();
+                    Response response = Tool.convertToResponse(responseLine);
+                    System.out.println(response.toString());
+                }
             }
             System.out.println("Select Test Mode: 1-single thread, 2-multi-threads");
             option = scanner.nextInt();

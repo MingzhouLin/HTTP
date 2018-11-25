@@ -48,20 +48,13 @@ public class HttpLibrary {
 //        }
 //    }
 
-    public Response send(ClientUDP client) {
+    public void send(ClientUDP client) {
         Request request = curlCommandLine.request;
-        String responseLine = "";
         try {
             client.send(request.toString());
-            ByteBuffer buf = ByteBuffer.allocate(65534);
-            int length = client.receive(buf);
-            buf.flip();
-            responseLine = utf8.decode(buf).toString();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Response response = Tool.convertToResponse(responseLine);
-        return response;
     }
 }
 

@@ -22,13 +22,23 @@ public class SendBuffer extends Manager {
     private Map<Long, Timer> timerMap;
 
     private int    hasSth2Send;
+    private int indexOfQueue;
     private Packet basePacket;
     private Packet lastPacket;
+
+    public int getIndexOfQueue() {
+        return indexOfQueue;
+    }
+
+    public void setIndexOfQueue(int indexOfQueue) {
+        this.indexOfQueue = indexOfQueue;
+    }
 
     public SendBuffer(List<Packet> queue, ChannelThread channelThread) {
         this.queue    = queue;
         this.thread   = channelThread;
         this.timerMap = new HashMap<>();
+        indexOfQueue=0;
     }
 
     @Override
@@ -97,8 +107,10 @@ public class SendBuffer extends Manager {
     public void slideWindow(){
         int offset = this.getAlreadyAckAmt();
         for (int i = 0; i < offset; i++) {
-            if (!this.queue.isEmpty())
+            if (!this.queue.isEmpty()) {
                 this.queue.remove(0);
+                this.indexOfQueue--;
+            }
             else
                 break;
         }
